@@ -1,0 +1,326 @@
+<t name="OdooIQ Intranet" t-name="website.intranet">
+    <t t-call="website.layout">
+        <div id="wrap" class="oe_structure">
+
+            <section class="s_text_block pt-5 pb-3">
+                <div class="container">
+                    <div class="text-center">
+                        <h1 class="display-4 fw-bold mb-2">OdooIQ Intranet</h1>
+                        <p class="lead text-muted mb-0">Central hub for every service hosted on this server</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Today's Calendar ===== -->
+            <section class="s_text_block py-5 bg-white border-top">
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-end mb-4">
+                        <div>
+                            <h2 class="h5 text-uppercase text-muted mb-0">Today's Calendar — John</h2>
+                            <p class="small text-muted mb-0">john@odooiq.com</p>
+                        </div>
+                        <a href="/odoo/calendar" class="small text-decoration-none">Open Calendar app →</a>
+                    </div>
+                    <t t-set="john_user" t-value="request.env['res.users'].sudo().search([('login','=','john@odooiq.com')], limit=1)"/>
+                    <t t-set="day_start" t-value="datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0)"/>
+                    <t t-set="day_end" t-value="day_start + datetime.timedelta(days=1)"/>
+                    <t t-set="events" t-value="request.env['calendar.event'].sudo().search([('partner_ids','in', john_user.partner_id.ids),('start','&gt;=',day_start),('start','&lt;',day_end)], order='start')"/>
+                    <div class="list-group shadow-sm" t-if="events">
+                        <t t-foreach="events" t-as="ev">
+                            <div class="list-group-item d-flex align-items-start">
+                                <div class="text-primary fw-bold me-3" style="min-width:110px;">
+                                    <span t-esc="ev.start.strftime('%H:%M')"/> – <span t-esc="ev.stop.strftime('%H:%M')"/>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold mb-1" t-esc="ev.name"/>
+                                    <div class="small text-muted" t-if="ev.description" t-esc="ev.description"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                    <div t-if="not events" class="alert alert-light border">
+                        No calendar events scheduled for today.
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== To Do ===== -->
+            <section class="s_text_block py-5 bg-light">
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-end mb-4">
+                        <div>
+                            <h2 class="h5 text-uppercase text-muted mb-0">To Do — John</h2>
+                            <p class="small text-muted mb-0">john@odooiq.com — open tasks</p>
+                        </div>
+                        <a href="/odoo/project" class="small text-decoration-none">Open Projects app →</a>
+                    </div>
+                    <t t-set="tasks" t-value="request.env['project.task'].sudo().search([('user_ids','in', john_user.ids),('state','not in',('1_done','1_canceled'))], order='date_deadline, priority desc, sequence', limit=20)"/>
+                    <div class="list-group shadow-sm" t-if="tasks">
+                        <t t-foreach="tasks" t-as="task">
+                            <div class="list-group-item d-flex align-items-center">
+                                <input type="checkbox" class="form-check-input me-3" disabled="disabled"/>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold" t-esc="task.name"/>
+                                    <div class="small text-muted">
+                                        <span t-if="task.project_id" t-esc="task.project_id.name"/>
+                                        <span t-if="task.date_deadline"> · Due <span t-esc="task.date_deadline.strftime('%b %d')"/></span>
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary ms-2" t-if="task.priority and task.priority != '0'" t-esc="'★' * int(task.priority)"/>
+                            </div>
+                        </t>
+                    </div>
+                    <div t-if="not tasks" class="alert alert-light border">
+                        No open tasks assigned to John. <a href="/odoo/project">Create one →</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Email ===== -->
+            <section class="s_text_block py-5 bg-white border-top o_colored_level">
+                <div class="container">
+                    <h2 class="h5 text-uppercase text-muted mb-3">Email</h2>
+                    <div class="card border-0 shadow-sm" style="cursor: pointer;">
+                        <div class="card-body d-flex align-items-center flex-wrap gap-3">
+                            <div class="flex-grow-1">
+                                <h3 class="card-title h6 mb-1">Webmail (Netfirms)</h3>
+                                <p class="small text-muted mb-0">Logs into the Netfirms mailbox for john@odooiq.com</p>
+                            </div>
+                            <a href="https://emailmg.netfirms.com/roundcube/?_task=mail&amp;_mbox=INBOX" target="_blank" class="btn-lg btn btn-primary" rel="noreferrer noopener"><br/>                                ✉ Open Webmail<br/>                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Odoo Instances ===== -->
+            <section class="s_text_block py-5 bg-light border-top">
+                <div class="container">
+                    <h2 class="h5 text-uppercase text-muted mb-4">Odoo Instances</h2>
+                    <div class="row g-4">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm border-primary">
+                                <div class="card-body d-flex flex-column">
+                                    <span class="badge bg-primary align-self-start mb-2">Home</span>
+                                    <h3 class="card-title h5">OdooIQ</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Main OdooIQ business database. Daily operations and projects.</p>
+                                    <a href="https://www.odooiq.local:9448/web/login" class="btn btn-outline-primary mt-3">Open OdooIQ</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">AlfaCore</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Luxury automotive service platform for Italian-platform vehicles. Production Odoo 19 EE.</p>
+                                    <a href="https://192.168.68.108:9443/web/login" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-3">Open AlfaCore</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Southbrook Cabinetry</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Custom cabinetry demo instance.</p>
+                                    <a href="https://www.southbrookcabinetry.local:9444/web/login" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-3">Open Southbrook</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Sapienzium</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Sapienzium demo instance.</p>
+                                    <a href="https://www.sapienzium.local:9445/web/login" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-3">Open Sapienzium</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Porterly</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Porterly demo instance.</p>
+                                    <a href="https://www.porterly.local:9446/web/login" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-3">Open Porterly</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Tribancs</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Tribancs demo instance.</p>
+                                    <a href="https://www.tribancs.local:9447/web/login" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-3">Open Tribancs</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Quattroporte</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Quattroporte demo instance.</p>
+                                    <a href="https://www.quattroporte.local:9449/web/login" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-3">Open Quattroporte</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">OdooAI</h3>
+                                    <p class="card-text text-muted small flex-grow-1">OdooAI demo instance.</p>
+                                    <a href="https://www.odooai.local:9450/web/login" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-3">Open OdooAI</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Projects (existing) ===== -->
+            <section class="s_text_block py-5 bg-white border-top">
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-end mb-4">
+                        <h2 class="h5 text-uppercase text-muted mb-0">Projects</h2>
+                        <a href="/odoo/project" class="small text-decoration-none">Open Projects app →</a>
+                    </div>
+                    <t t-set="projects" t-value="request.env['project.project'].sudo().search([], order='sequence, name')"/>
+                    <div class="row g-3" t-if="projects">
+                        <t t-foreach="projects" t-as="proj">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body d-flex flex-column">
+                                        <h3 class="card-title h6 mb-1" t-esc="proj.name"/>
+                                        <p class="small text-muted mb-2">
+                                            <span t-if="proj.user_id">Manager: <span t-esc="proj.user_id.name"/></span>
+                                            <span t-else="">Unassigned</span>
+                                        </p>
+                                        <p class="small text-muted mb-3">
+                                            <span t-esc="proj.task_count"/> open tasks
+                                        </p>
+                                        <a t-att-href="'/odoo/project/' + str(proj.id)" class="btn btn-sm btn-outline-secondary mt-auto">Open project</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                    <div t-if="not projects" class="alert alert-light border">
+                        No projects yet. <a href="/odoo/project">Create one in the Projects app</a>.
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Backups (existing) ===== -->
+            <section class="s_text_block py-5 bg-white border-top">
+                <div class="container">
+                    <t t-set="backups_html" t-value="request.env['ir.config_parameter'].sudo().get_param('odooiq.backups_section_html', '')"/>
+                    <t t-if="backups_html" t-raw="backups_html"/>
+                    <div t-if="not backups_html">
+                        <h2 class="h5 text-uppercase text-muted mb-3">Backups</h2>
+                        <div class="alert alert-warning">
+                            No backup snapshot yet. Run <code>/share/CACHEDEV3_DATA/Container/scripts/refresh-intranet-backups.sh</code> on the host to populate.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Developer Tools (expanded) ===== -->
+            <section class="s_text_block py-5 bg-light border-top">
+                <div class="container">
+                    <h2 class="h5 text-uppercase text-muted mb-4">Developer Tools</h2>
+                    <div class="row g-4">
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">OdooIQ Server (CGI)</h3>
+                                    <p class="card-text text-muted small flex-grow-1">QNAP QTS admin CGI scripts directory — low-level system utilities.</p>
+                                    <a href="http://192.168.68.108:8080/cgi-bin/" target="_blank" rel="noopener noreferrer" class="btn btn-dark mt-3">Open CGI</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Forgejo (LAN)</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Self-hosted Git service. LAN-direct path; serves all 9 Odoo stacks.</p>
+                                    <a href="https://192.168.68.108:9443/git/" target="_blank" rel="noopener noreferrer" class="btn btn-dark mt-3">Open Forgejo</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Forgejo · qnap org</h3>
+                                    <p class="card-text text-muted small flex-grow-1">All repos under the qnap organization (alfacore + 7 demo configs).</p>
+                                    <a href="https://southbrookcabinetry.space/git/qnap" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark mt-3">Browse repos</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">QNAP Admin (LAN)</h3>
+                                    <p class="card-text text-muted small flex-grow-1">QTS web admin, direct LAN access — fastest path when on-site.</p>
+                                    <a href="http://192.168.68.108:8080" target="_blank" rel="noopener noreferrer" class="btn btn-success mt-3">Open QTS (LAN)</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">QNAP Admin (Public)</h3>
+                                    <p class="card-text text-muted small flex-grow-1">QTS via Cloudflare Tunnel + Access OTP. Reachable from anywhere.</p>
+                                    <a href="https://qnap.odooiq.com" target="_blank" rel="noopener noreferrer" class="btn btn-success mt-3">Open QTS (Public)</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Cloudflare Dashboard</h3>
+                                    <p class="card-text text-muted small flex-grow-1">DNS, zones, page rules, and SSL/TLS for the 7 managed domains.</p>
+                                    <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer" class="btn btn-warning mt-3">Open Cloudflare</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Cloudflare Zero Trust</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Tunnel management + Access policies + OTP auth for QTS gate.</p>
+                                    <a href="https://one.dash.cloudflare.com/" target="_blank" rel="noopener noreferrer" class="btn btn-warning mt-3">Open Zero Trust</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">Odoo CE source</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Official Odoo 19 CE source on GitHub — for code lookups.</p>
+                                    <a href="https://github.com/odoo/odoo/tree/19.0" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary mt-3">View on GitHub</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title h5">OCA community addons</h3>
+                                    <p class="card-text text-muted small flex-grow-1">Odoo Community Association — high-quality community module repos.</p>
+                                    <a href="https://github.com/OCA" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary mt-3">View on GitHub</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </t>
+</t>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Snapshot of the OdooIQ Intranet page (view id 4299 in production).
+     To redeploy:
+       1. Read views/intranet.qweb.xml (the arch_db content)
+       2. Update ir.ui.view with key="website.intranet" via Odoo API or via the included deploy.py
+     This file is for reference / Odoo module-style import. -->
+<odoo>
+    <data noupdate="0">
+        <record id="intranet_page_view" model="ir.ui.view">
+            <field name="name">OdooIQ Intranet</field>
+            <field name="key">website.intranet</field>
+            <field name="type">qweb</field>
+            <field name="arch" type="xml">
+                <!-- Content lives in views/intranet.qweb.xml -->
+            </field>
+        </record>
+    </data>
+</odoo>
